@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-func runCommands(host string, user, pwd, cmd string) {
+func runCommands(host, user, pwd string, commands ...string) {
 	session, err := connect(user, pwd, host, 22)
 	if err != nil {
 		log.Fatal(err)
@@ -15,14 +15,17 @@ func runCommands(host string, user, pwd, cmd string) {
 	session.Stdout = os.Stdout
 	session.Stderr = os.Stderr
 
-	log.Println("$ " + cmd)
+	for _, cmd := range commands {
+		log.Println("$ " + cmd)
 
-	if err = session.Run(cmd); err != nil {
-		log.Println(err)
+		if err = session.Run(cmd); err != nil {
+			log.Println(err)
+		}
 	}
+
 }
 
-func getCommandsOutput(host string, user, pwd, cmd string) string {
+func getCommandsOutput(host, user, pwd, cmd string) string {
 
 	session, err := connect(user, pwd, host, 22)
 	if err != nil {

@@ -57,17 +57,15 @@ func main() {
 					}
 				}
 
-				for _, cmd := range preMasterCommands {
-					runCommands(ip, username, password, cmd)
-				}
+				runCommands(ip, username, password, preMasterCommands...)
 
 				runCommands(ip, username, password, "sudo apt install nfs-common -y")
 				k3sCmd := "curl -sfL http://rancher-mirror.cnrancher.com/k3s/k3s-install.sh | INSTALL_K3S_MIRROR=cn sh -s - --tls-san " + ip
 				if strings.Contains(masterExtraArgs, "--docker") {
 					runCommands(ip, username, password, "sudo apt install docker.io -y")
 				}
-				if workerExtraArgs != "" {
-					k3sCmd += " " + workerExtraArgs
+				if masterExtraArgs != "" {
+					k3sCmd += " " + masterExtraArgs
 				}
 				runCommands(ip, username, password, k3sCmd)
 
@@ -77,9 +75,7 @@ func main() {
 				k3sConfig = strings.Replace(k3sConfig, "127.0.0.1", ip, 1)
 				ioutil.WriteFile("k3s.yaml", []byte(k3sConfig), os.ModePerm)
 
-				for _, cmd := range masterCommands {
-					runCommands(ip, username, password, cmd)
-				}
+				runCommands(ip, username, password, masterCommands...)
 			}
 
 			for _, ip := range workerIPs {
@@ -89,9 +85,7 @@ func main() {
 					runCommands(ip, username, password, "echo "+split+" >> /home/"+username+"/.ssh/authorized_keys")
 				}
 
-				for _, cmd := range preWorkerCommands {
-					runCommands(ip, username, password, cmd)
-				}
+				runCommands(ip, username, password, preWorkerCommands...)
 
 				runCommands(ip, username, password, "sudo apt install nfs-common -y")
 				k3sCmd := "curl -sfL http://rancher-mirror.cnrancher.com/k3s/k3s-install.sh | INSTALL_K3S_MIRROR=cn sh -s - agent --server " + k3sURL + " --token " + k3sToken
@@ -103,9 +97,7 @@ func main() {
 				}
 				runCommands(ip, username, password, k3sCmd)
 
-				for _, cmd := range masterCommands {
-					runCommands(ip, username, password, cmd)
-				}
+				runCommands(ip, username, password, workerCommands...)
 			}
 
 		},
