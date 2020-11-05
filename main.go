@@ -88,13 +88,14 @@ func main() {
 				runCommands(ip, username, password, preWorkerCommands...)
 
 				runCommands(ip, username, password, "sudo apt install nfs-common -y")
-				k3sCmd := "curl -sfL http://rancher-mirror.cnrancher.com/k3s/k3s-install.sh | INSTALL_K3S_MIRROR=cn sh -s - agent --server " + k3sURL + " --token " + k3sToken
+				k3sCmd := "curl -sfL http://rancher-mirror.cnrancher.com/k3s/k3s-install.sh | INSTALL_K3S_MIRROR=cn sh -s - agent"
 				if strings.Contains(workerExtraArgs, "--docker") {
 					runCommands(ip, username, password, "sudo apt install docker.io -y")
 				}
 				if workerExtraArgs != "" {
 					k3sCmd += " " + workerExtraArgs
 				}
+				k3sCmd += " --server " + k3sURL + " --token " + k3sToken
 				runCommands(ip, username, password, k3sCmd)
 
 				runCommands(ip, username, password, workerCommands...)
