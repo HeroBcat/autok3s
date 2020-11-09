@@ -69,11 +69,13 @@ func main() {
 				}
 				runCommands(ip, username, password, k3sCmd)
 
-				k3sURL = "https://" + ip + ":6443"
-				k3sToken = getCommandsOutput(ip, username, password, "sudo cat -s /var/lib/rancher/k3s/server/node-token")
-				k3sConfig := getCommandsOutput(ip, username, password, "sudo cat -s /etc/rancher/k3s/k3s.yaml")
-				k3sConfig = strings.Replace(k3sConfig, "127.0.0.1", ip, 1)
-				ioutil.WriteFile("k3s.yaml", []byte(k3sConfig), os.ModePerm)
+				if k3sToken == "" || k3sURL == "" {
+					k3sURL = "https://" + ip + ":6443"
+					k3sToken = getCommandsOutput(ip, username, password, "sudo cat -s /var/lib/rancher/k3s/server/node-token")
+					k3sConfig := getCommandsOutput(ip, username, password, "sudo cat -s /etc/rancher/k3s/k3s.yaml")
+					k3sConfig = strings.Replace(k3sConfig, "127.0.0.1", ip, 1)
+					ioutil.WriteFile("k3s.yaml", []byte(k3sConfig), os.ModePerm)
+				}
 
 				runCommands(ip, username, password, masterCommands...)
 			}
