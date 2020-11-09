@@ -47,6 +47,7 @@ func main() {
 
 			var k3sToken string
 			var k3sURL string
+			var isHA = len(masterIPs) > 1
 
 			for _, ip := range masterIPs {
 
@@ -67,10 +68,23 @@ func main() {
 				if masterExtraArgs != "" {
 					k3sCmd += " " + masterExtraArgs
 				}
+
+				if isHA {
+					if k3sURL != "" && k3sToken != "" {
+						k3sCmd += " --server " + k3sURL
+						k3sCmd += " --token " + k3sToken
+					} else {
+						k3sCmd += "  --cluster-init"
+					}
+				}
+
 				runCommands(ip, username, password, k3sCmd)
 
-				if k3sToken == "" || k3sURL == "" {
+				if k3sURL == "" {
 					k3sURL = "https://" + ip + ":6443"
+				}
+
+				if k3sToken == "" {
 					k3sToken = getCommandsOutput(ip, username, password, "sudo cat -s /var/lib/rancher/k3s/server/node-token")
 					k3sConfig := getCommandsOutput(ip, username, password, "sudo cat -s /etc/rancher/k3s/k3s.yaml")
 					k3sConfig = strings.Replace(k3sConfig, "127.0.0.1", ip, 1)
